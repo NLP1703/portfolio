@@ -1,0 +1,303 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ------------------------------------------------------------------
+   Jetons de mouvement (communs aux deux thèmes)
+   ------------------------------------------------------------------ */
+:root {
+  /* Décélération longue : l'essentiel de la distance est parcouru tôt,
+     la fin est très lente. C'est la signature du système. */
+  --ease-cinematic: cubic-bezier(0.16, 1, 0.3, 1);
+  /* Courbe symétrique, réservée aux surfaces qui apparaissent en bloc. */
+  --ease-overlay: cubic-bezier(0.4, 0, 0.2, 1);
+  /* Alimentée image par image par useScrollMotion. */
+  --scroll-progress: 0;
+}
+
+/* ------------------------------------------------------------------
+   Design tokens — thème sombre (par défaut)
+   ------------------------------------------------------------------ */
+:root,
+[data-theme='dark'] {
+  --bg-primary: #0a0f1c; /* Midnight  */
+  --bg-secondary: #111827; /* Charcoal  */
+  --bg-elevated: #1e293b; /* Slate     */
+
+  --text-primary: #e2e8f0; /* Silver    */
+  --text-secondary: #94a3b8; /* Mist      */
+  --text-muted: #74839a; /* Fog — remonté depuis #64748B : 4.03:1 sur Midnight, sous le seuil AA */
+
+  --accent: #22d3ee; /* Cyan      */
+  --accent-hover: #06b6d4; /* Deep Cyan */
+  --accent-glow: rgba(34, 211, 238, 0.15);
+  --accent-soft: rgba(34, 211, 238, 0.08);
+  --accent-line: rgba(34, 211, 238, 0.2);
+
+  --green: #4ade80; /* Terminal Green */
+  --amber: #fbbf24; /* Gold           */
+
+  --hairline: rgba(148, 163, 184, 0.1);
+  /* Palier intermédiaire entre la card et le surélevé, pour le survol. */
+  --surface-hover: #16202f;
+  --nav-bg: rgba(10, 15, 28, 0.85);
+  --overlay: rgba(10, 15, 28, 0.7);
+  --thumb-ink: rgba(148, 163, 184, 0.18);
+}
+
+/* ------------------------------------------------------------------
+   Thème clair — mêmes rôles, contrastes AA conservés
+   ------------------------------------------------------------------ */
+[data-theme='light'] {
+  /*
+   * Le fond de page est teinté, les cards sont blanches : c'est cet écart
+   * qui donne au thème clair la profondeur que deux gris voisins ne
+   * produisaient pas. Le surélevé sert de troisième palier (puces neutres).
+   */
+  --bg-primary: #f4f7fa;
+  --bg-secondary: #ffffff;
+  --bg-elevated: #e8eef5;
+
+  --text-primary: #0f172a;
+  --text-secondary: #475569;
+  /* Assombri depuis #64748B : 4.43:1 sur le nouveau fond, sous le seuil AA. */
+  --text-muted: #5b6b80;
+
+  --accent: #0e7490;
+  --accent-hover: #155e75;
+  --accent-glow: rgba(14, 116, 144, 0.18);
+  --accent-soft: rgba(14, 116, 144, 0.08);
+  --accent-line: rgba(14, 116, 144, 0.25);
+
+  --green: #15803d;
+  --amber: #b45309;
+
+  --hairline: rgba(15, 23, 42, 0.09);
+  /* Survol : la card blanche tire imperceptiblement vers l'accent. */
+  --surface-hover: #f7fbfc;
+  --nav-bg: rgba(244, 247, 250, 0.85);
+  --overlay: rgba(244, 247, 250, 0.75);
+  --thumb-ink: rgba(15, 23, 42, 0.12);
+}
+
+@layer base {
+  * {
+    border-color: var(--hairline);
+  }
+
+  html {
+    scroll-behavior: smooth;
+    -webkit-text-size-adjust: 100%;
+  }
+
+  body {
+    @apply bg-bg-primary font-sans text-body text-ink-primary antialiased;
+    margin: 0;
+  }
+
+  h1,
+  h2,
+  h3 {
+    @apply font-mono font-bold text-ink-primary;
+  }
+
+  ::selection {
+    background: var(--accent);
+    color: var(--bg-primary);
+  }
+
+  /* La barre de défilement par défaut trahit le thème du système. */
+  html {
+    scrollbar-width: thin;
+    scrollbar-color: var(--bg-elevated) transparent;
+  }
+
+  ::-webkit-scrollbar {
+    width: 10px;
+    height: 10px;
+  }
+
+  ::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  ::-webkit-scrollbar-thumb {
+    background: var(--bg-elevated);
+    border: 2px solid var(--bg-primary);
+    border-radius: 9999px;
+  }
+
+  ::-webkit-scrollbar-thumb:hover {
+    background: var(--text-muted);
+  }
+
+  :focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 3px;
+    border-radius: 2px;
+  }
+
+  /* Décalage d'ancrage : la navbar fixe ne doit pas masquer les titres. */
+  section[id] {
+    scroll-margin-top: 88px;
+  }
+}
+
+@layer components {
+  .container-page {
+    @apply mx-auto w-full max-w-container px-6 lg:px-16;
+  }
+
+  /*
+   * Rythme vertical. Le padding d'une section + celui de la suivante forment
+   * l'espacement inter-sections demandé : 72px mobile, 96px tablette,
+   * 120px desktop.
+   */
+  .section-gap {
+    @apply py-9 md:py-12 lg:py-[60px];
+  }
+
+  .btn {
+    @apply inline-flex items-center justify-center gap-2 rounded-control font-mono text-caption font-medium;
+    padding: 12px 28px;
+    transition-property: background-color, color, border-color, transform;
+    transition-duration: 200ms;
+    transition-timing-function: var(--ease-cinematic);
+  }
+
+  .btn-primary {
+    @apply btn bg-accent text-bg-primary;
+  }
+
+  .btn-primary:hover {
+    background-color: var(--accent-hover);
+    transform: scale(1.02);
+  }
+
+  .btn-secondary {
+    @apply btn border border-accent bg-transparent text-accent;
+  }
+
+  .btn-secondary:hover {
+    background-color: var(--accent-soft);
+    transform: scale(1.02);
+  }
+
+  .btn-sm {
+    padding: 9px 18px;
+  }
+
+  .tag {
+    @apply inline-flex items-center rounded-control border border-accent-line bg-accent-soft;
+    @apply font-mono text-tag text-accent;
+    padding: 4px 12px;
+  }
+
+  /*
+   * Puce neutre. Le cyan signale une compétence ; la stack d'un projet est
+   * un détail d'implémentation et n'a pas à crier aussi fort — une carte en
+   * aligne jusqu'à douze. Même forme, poids visuel divisé.
+   */
+  .tag-muted {
+    border-color: var(--hairline);
+    background: var(--bg-elevated);
+    color: var(--text-secondary);
+  }
+
+  .tag-green {
+    border-color: color-mix(in srgb, var(--green) 25%, transparent);
+    background: color-mix(in srgb, var(--green) 9%, transparent);
+    color: var(--green);
+  }
+
+  .tag-amber {
+    border-color: color-mix(in srgb, var(--amber) 25%, transparent);
+    background: color-mix(in srgb, var(--amber) 9%, transparent);
+    color: var(--amber);
+  }
+
+  .card {
+    @apply rounded-card border border-hairline bg-bg-secondary p-6;
+    transition-property: border-color, box-shadow, background-color;
+    transition-duration: 300ms;
+    transition-timing-function: var(--ease-cinematic);
+  }
+
+  .card-interactive:hover {
+    border-color: var(--accent);
+    background-color: var(--surface-hover);
+    box-shadow: 0 0 20px var(--accent-glow);
+  }
+
+  .prose-body {
+    @apply max-w-measure text-body text-ink-secondary;
+  }
+
+  /*
+   * Le contenu du hero s'efface au fil du défilement, piloté par
+   * --scroll-progress : il a disparu à 55% d'un viewport, avant que la
+   * section suivante n'entre. Une séquence chasse l'autre, jamais de
+   * superposition. Sous mouvement réduit la variable reste à 0 : opacité 1.
+   */
+  .scroll-fade {
+    opacity: calc(1 - var(--scroll-progress) / 0.55);
+  }
+}
+
+/* ------------------------------------------------------------------
+   Animations locales (hero)
+   ------------------------------------------------------------------ */
+@keyframes caret-blink {
+  0%,
+  49% {
+    opacity: 1;
+  }
+  50%,
+  100% {
+    opacity: 0;
+  }
+}
+
+.caret {
+  @apply inline-block w-[0.6ch] bg-accent align-baseline;
+  height: 1em;
+  transform: translateY(0.12em);
+}
+
+/* Curseur pendant la frappe : plein, sans clignotement. */
+.caret-typing {
+  opacity: 1;
+}
+
+/* À la fin : trois clignotements puis disparition définitive. */
+.caret-finish {
+  animation: caret-blink 600ms steps(1, end) 3 forwards;
+  opacity: 0;
+}
+
+/* ------------------------------------------------------------------
+   prefers-reduced-motion : tout le mouvement est neutralisé
+   ------------------------------------------------------------------ */
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+    scroll-behavior: auto !important;
+  }
+
+  .caret-finish {
+    opacity: 0;
+  }
+
+  .btn-primary:hover,
+  .btn-secondary:hover {
+    transform: none;
+  }
+}
