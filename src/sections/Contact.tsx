@@ -1,4 +1,5 @@
 import { FiGithub, FiLinkedin, FiMail, FiPhone } from 'react-icons/fi'
+import { ContactForm } from '../components/ContactForm'
 import { Section, useSectionMotion } from '../components/Section'
 import { SectionHeading } from '../components/SectionHeading'
 import { Stagger } from '../components/Stagger'
@@ -29,10 +30,8 @@ function ContactBody() {
         </p>
       </Stagger>
 
-      <Stagger show={inView} delay={150}>
-        <a href={`mailto:${site.links.email}`} className="btn-primary mt-8">
-          Me contacter par email
-        </a>
+      <Stagger show={inView} delay={150} className="mt-8 w-full">
+        <ContactForm />
       </Stagger>
 
       <Stagger show={inView} delay={250}>

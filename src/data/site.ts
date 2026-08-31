@@ -24,6 +24,14 @@ export const site = {
     email: 'pharelndongo2005@gmail.com',
   },
 
+  /**
+   * Endpoint de formulaire (Formspree, Web3Forms, Netlify Forms…).
+   * Vide : le formulaire compose le message et ouvre la messagerie du
+   * visiteur. Renseigné : le message part par requête POST et arrive
+   * directement dans votre boîte, sans logiciel de messagerie côté visiteur.
+   */
+  formEndpoint: '' as string,
+
   /** `href` au format international, `display` pour l'affichage. */
   phones: [
     { display: '+237 6 56 76 33 41', href: '+237656763341' },

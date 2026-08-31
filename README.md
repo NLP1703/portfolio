@@ -57,6 +57,7 @@ Dans [`src/data/site.ts`](src/data/site.ts) :
 | `links.linkedin` | Vide par défaut : l'icône LinkedIn n'apparaît pas tant que l'URL n'est pas renseignée. |
 | `links.email` | `pharelndongo2005@gmail.com`, confirmé. |
 | `phones` | Deux numéros, affichés dans la section Contact en liens `tel:`. Indicatif `+237` supposé. |
+| `formEndpoint` | Vide : le formulaire ouvre la messagerie du visiteur. Renseigné : le message arrive dans votre boîte sans passer par un logiciel de messagerie (voir ci-dessous). |
 | `avatar` | Vide : le monogramme « NLP » est affiché. Renseignez `/photo.jpg` après avoir déposé le fichier dans `public/`. |
 | `cv` | Le bouton pointe vers `/CV-NDONGO-Louis-Pharel.pdf`, généré par `npm run cv` (voir ci-dessous). |
 
@@ -70,6 +71,34 @@ Enfin, remplacez l'URL `https://ndongo-louis-pharel.vercel.app/` dans `index.htm
 Pour ajouter une capture d'écran à un projet : déposez l'image dans `public/` puis renseignez le
 champ `image` du projet dans [`src/data/projects.ts`](src/data/projects.ts). Sans image, une vignette
 générative en aplats (fenêtre de terminal) est utilisée.
+
+## Le formulaire de contact
+
+La section Contact porte un formulaire (nom, email, message). Un site statique ne peut pas envoyer
+d'email par lui-même : il n'y a pas de serveur pour le faire. Deux modes, selon `formEndpoint` dans
+[`src/data/site.ts`](src/data/site.ts).
+
+**Par défaut, `formEndpoint` est vide.** Le formulaire compose le message et ouvre le logiciel de
+messagerie du visiteur avec destinataire, objet et corps déjà remplis ; il ne reste qu'à envoyer.
+Zéro configuration, zéro compte tiers, aucune donnée qui transite par un service externe. Limite à
+connaître : un visiteur sans client de messagerie configuré — un utilisateur de webmail sur un
+ordinateur de bureau, par exemple — verra son navigateur ne rien faire. Le message de statut affiche
+alors votre adresse en clair pour qu'il puisse copier-coller.
+
+**Pour que le message arrive directement dans votre boîte**, créez un endpoint chez un service de
+formulaires et collez son URL dans `formEndpoint` :
+
+```ts
+formEndpoint: 'https://formspree.io/f/VOTRE_ID',
+```
+
+Le formulaire enverra alors une requête `POST` en JSON (`{ name, email, message }`) et affichera un
+accusé de réception dans la page, sans ouvrir de logiciel de messagerie. [Formspree](https://formspree.io),
+[Web3Forms](https://web3forms.com) et [Formsubmit](https://formsubmit.co) fonctionnent tels quels,
+en offre gratuite, et ne demandent aucun code supplémentaire.
+
+Un champ piège invisible écarte les robots les plus simples, et le message est plafonné à
+1 500 caractères — au-delà, certains clients de messagerie tronquent l'URL en mode `mailto:`.
 
 ## Le CV est généré, pas déposé
 
