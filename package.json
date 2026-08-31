@@ -7,7 +7,8 @@
     "dev": "vite",
     "build": "tsc -b && vite build",
     "preview": "vite preview",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "cv": "esbuild scripts/build-cv.mjs --bundle --platform=node --format=esm --outfile=node_modules/.cache/cv.mjs --log-level=warning && node node_modules/.cache/cv.mjs"
   },
   "dependencies": {
     "framer-motion": "^11.11.17",

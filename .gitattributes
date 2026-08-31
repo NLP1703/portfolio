@@ -1,0 +1,13 @@
+# Normalise les fins de ligne du code, sans jamais toucher aux binaires :
+# une conversion LF/CRLF sur un PDF ou une image corrompt le fichier.
+* text=auto eol=lf
+
+*.pdf binary
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.gif binary
+*.ico binary
+*.woff binary
+*.woff2 binary
+*.mp4 binary

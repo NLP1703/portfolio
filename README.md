@@ -24,6 +24,7 @@ Autres scripts :
 npm run build      # typecheck (tsc -b) puis build de production dans dist/
 npm run preview    # sert le build de production localement
 npm run typecheck  # vérification TypeScript seule
+npm run cv         # régénère public/CV-NDONGO-Louis-Pharel.pdf
 ```
 
 ## Structure
@@ -40,7 +41,8 @@ src/
   hooks/                 useTheme, useActiveSection, useTypewriter, useInView,
                          useScrollMotion
   styles/index.css       tokens de couleur, classes .btn / .tag / .card, animations
-public/                  favicon, robots.txt, et vos fichiers statiques (CV, og-image)
+scripts/                 build-cv.mjs (générateur de CV) + pdf.mjs (primitives PDF)
+public/                  favicon, robots.txt, CV généré, et vos fichiers statiques
 ```
 
 Tout le contenu textuel vit dans `src/data/` : aucun texte n'est codé en dur dans un composant
@@ -56,11 +58,10 @@ Dans [`src/data/site.ts`](src/data/site.ts) :
 | `links.email` | `pharelndongo2005@gmail.com`, confirmé. |
 | `phones` | Deux numéros, affichés dans la section Contact en liens `tel:`. Indicatif `+237` supposé. |
 | `avatar` | Vide : le monogramme « NLP » est affiché. Renseignez `/photo.jpg` après avoir déposé le fichier dans `public/`. |
-| `cv` | Le bouton pointe vers `/CV-NDONGO-Louis-Pharel.pdf` : déposez ce PDF dans `public/`. |
+| `cv` | Le bouton pointe vers `/CV-NDONGO-Louis-Pharel.pdf`, généré par `npm run cv` (voir ci-dessous). |
 
-Fichiers statiques à ajouter dans `public/` :
+Fichier statique restant à ajouter dans `public/` :
 
-- `CV-NDONGO-Louis-Pharel.pdf` — cible du bouton « Télécharger le CV »
 - `og-image.png` — image de partage social, **1200 × 630 px** (référencée dans `index.html`)
 
 Enfin, remplacez l'URL `https://ndongo-louis-pharel.vercel.app/` dans `index.html` et
@@ -69,6 +70,28 @@ Enfin, remplacez l'URL `https://ndongo-louis-pharel.vercel.app/` dans `index.htm
 Pour ajouter une capture d'écran à un projet : déposez l'image dans `public/` puis renseignez le
 champ `image` du projet dans [`src/data/projects.ts`](src/data/projects.ts). Sans image, une vignette
 générative en aplats (fenêtre de terminal) est utilisée.
+
+## Le CV est généré, pas déposé
+
+Le bouton « Télécharger le CV » sert `public/CV-NDONGO-Louis-Pharel.pdf`, produit par
+[`scripts/build-cv.mjs`](scripts/build-cv.mjs) **à partir des mêmes fichiers `src/data/` que le
+site**. Modifier un projet ou une compétence, puis :
+
+```bash
+npm run cv
+```
+
+et le CV est à jour — une seule source de vérité, pas deux versions qui divergent.
+
+Le générateur n'a aucune dépendance : [`scripts/pdf.mjs`](scripts/pdf.mjs) écrit directement la
+structure PDF 1.4 et s'appuie sur Helvetica, police standard qu'aucun lecteur n'a besoin de voir
+embarquée. Le texte est encodé en WinAnsi (accents français couverts), la mise en page tient sur une
+page A4, et le script vérifie la cohérence de sa propre table `xref` avant d'écrire le fichier.
+`CV_DEBUG=1 npm run cv` affiche la position verticale atteinte à chaque titre de section, pour
+diagnostiquer un débordement.
+
+Si vous disposez d'un CV rédigé à la main que vous préférez servir, remplacez simplement le fichier
+dans `public/` — le bouton pointe sur le chemin, pas sur le générateur.
 
 ## Déploiement
 
