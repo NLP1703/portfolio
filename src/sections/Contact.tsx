@@ -1,9 +1,16 @@
-import { FiGithub, FiLinkedin, FiMail, FiPhone } from 'react-icons/fi'
+import { lazy } from 'react'
+import { useReducedMotion } from 'framer-motion'
+import { FiGithub, FiLinkedin, FiMail, FiMapPin, FiPhone } from 'react-icons/fi'
 import { ContactForm } from '../components/ContactForm'
+import { Scene3D } from '../components/Scene3D'
 import { Section, useSectionMotion } from '../components/Section'
 import { SectionHeading } from '../components/SectionHeading'
 import { Stagger } from '../components/Stagger'
 import { site } from '../data/site'
+import { useMediaQuery } from '../hooks/useMediaQuery'
+import { useVisible } from '../hooks/useVisible'
+
+const Globe = lazy(() => import('../three/Globe'))
 
 type SocialLink = {
   label: string
@@ -17,6 +24,33 @@ const socials: SocialLink[] = [
   { label: 'LinkedIn', href: site.links.linkedin, icon: FiLinkedin, external: true },
   { label: 'Email', href: `mailto:${site.links.email}`, icon: FiMail, external: false },
 ].filter((link) => link.href && !link.href.endsWith('mailto:'))
+
+/**
+ * Globe à côté du formulaire, sur grand écran seulement : sur mobile il
+ * pousserait le formulaire sous la ligne de flottaison pour un simple décor,
+ * et le module 3D n'est alors même pas téléchargé.
+ */
+function ContactGlobe() {
+  const inView = useSectionMotion()
+  const reduce = useReducedMotion()
+  const globe = useVisible<HTMLDivElement>()
+
+  return (
+    <Stagger show={inView} delay={200}>
+      <figure className="flex flex-col items-center">
+        <div ref={globe.ref} className="aspect-square w-full max-w-[440px]">
+          <Scene3D className="h-full w-full">
+            <Globe animate={globe.visible && !reduce} />
+          </Scene3D>
+        </div>
+        <figcaption className="mt-2 inline-flex items-center gap-2 font-mono text-caption text-ink-muted">
+          <FiMapPin size={14} className="text-accent" aria-hidden="true" />
+          {site.location}
+        </figcaption>
+      </figure>
+    </Stagger>
+  )
+}
 
 function ContactBody() {
   const inView = useSectionMotion()
@@ -80,11 +114,24 @@ function ContactBody() {
   )
 }
 
+function ContactLayout() {
+  const wide = useMediaQuery('(min-width: 1024px)')
+
+  if (!wide) return <ContactBody />
+
+  return (
+    <div className="grid items-center gap-12 lg:grid-cols-2">
+      <ContactBody />
+      <ContactGlobe />
+    </div>
+  )
+}
+
 export function Contact() {
   return (
     <Section id="contact" labelledBy="titre-contact">
       <SectionHeading id="titre-contact" title="Contact" />
-      <ContactBody />
+      <ContactLayout />
     </Section>
   )
 }

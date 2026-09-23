@@ -10,6 +10,7 @@ ombre générique, aucun dégradé.
 - Tailwind CSS 3 (design tokens en variables CSS, thèmes sombre et clair)
 - Framer Motion (animations, `useReducedMotion` respecté partout)
 - React Icons (Feather + Lucide)
+- three.js + React Three Fiber (scènes 3D filaires, chargées à la demande)
 
 ## Démarrer
 
@@ -36,10 +37,11 @@ src/
   App.tsx                navbar + sections + footer, titre d'onglet dynamique
   data/                  contenu éditable (site, compétences, projets, expériences)
   sections/              Hero, About, Skills, Projects, Experience, Contact
-  components/            Navbar, ThemeToggle, Section, SectionHeading, Stagger, Avatar,
+  three/                 scènes 3D : StarField (fond), HeroOrb (avatar), Globe (contact)
+  components/            Navbar, ThemeToggle, Section, SectionHeading, Stagger, Tilt, Scene3D, Avatar,
                          ProjectThumb, Footer
   hooks/                 useTheme, useActiveSection, useTypewriter, useInView,
-                         useScrollMotion
+                         useScrollMotion, useVisible, useCssVar, useMediaQuery
   styles/index.css       tokens de couleur, classes .btn / .tag / .card, animations
 scripts/                 build-cv.mjs (générateur de CV) + pdf.mjs (primitives PDF)
 public/                  favicon, robots.txt, CV généré, et vos fichiers statiques
@@ -121,6 +123,22 @@ diagnostiquer un débordement.
 
 Si vous disposez d'un CV rédigé à la main que vous préférez servir, remplacez simplement le fichier
 dans `public/` — le bouton pointe sur le chemin, pas sur le générateur.
+
+## La 3D
+
+Trois scènes three.js, toutes filaires et teintées par l'accent du thème actif (lu depuis les
+variables CSS par `useCssVar`, donc elles suivent le passage sombre/clair) :
+
+- **StarField** : champ d'étoiles fixe derrière toute la page.
+- **HeroOrb** : polyèdre qui entoure l'avatar et s'incline vers le pointeur.
+- **Globe** : globe à côté du formulaire de contact, Yaoundé marquée, rotation au glisser.
+  Grand écran uniquement.
+
+Le coût reste hors du chemin critique : `Scene3D` ne demande le chunk `three` (~220 Ko gzip)
+qu'une fois le navigateur au repos, après le premier affichage. Une scène hors écran cesse de se
+redessiner, `prefers-reduced-motion` fige tout, et sans WebGL les scènes s'effacent sans erreur.
+
+Les cartes Compétences et Projets s'inclinent vers la souris (`Tilt`, Framer Motion).
 
 ## Déploiement
 

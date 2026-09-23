@@ -5,6 +5,7 @@ import { ProjectThumb } from '../components/ProjectThumb'
 import { Section, useSectionMotion } from '../components/Section'
 import { SectionHeading } from '../components/SectionHeading'
 import { Stagger } from '../components/Stagger'
+import { Tilt } from '../components/Tilt'
 import { projects, type Project } from '../data/projects'
 
 /** Décalage entre deux cartes projet. */
@@ -118,7 +119,9 @@ function ProjectList() {
     <div className="flex flex-col gap-8">
       {projects.map((project, index) => (
         <Stagger key={project.id} show={inView} delay={index * STEP}>
-          <ProjectCard project={project} reversed={index % 2 === 1} />
+          <Tilt max={3}>
+            <ProjectCard project={project} reversed={index % 2 === 1} />
+          </Tilt>
         </Stagger>
       ))}
     </div>

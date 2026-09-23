@@ -1,8 +1,13 @@
+import { lazy } from 'react'
 import { motion, useReducedMotion } from 'framer-motion'
 import { FiChevronDown } from 'react-icons/fi'
 import { Avatar } from '../components/Avatar'
+import { Scene3D } from '../components/Scene3D'
 import { site } from '../data/site'
 import { useTypewriter } from '../hooks/useTypewriter'
+import { useVisible } from '../hooks/useVisible'
+
+const HeroOrb = lazy(() => import('../three/HeroOrb'))
 
 const NAME = site.name.toUpperCase()
 
@@ -18,6 +23,7 @@ export function Hero() {
   })
 
   const words = NAME.split(' ')
+  const orb = useVisible<HTMLDivElement>()
 
   return (
     <section
@@ -30,18 +36,25 @@ export function Hero() {
        * disparu avant que « À propos » ne commence sa propre séquence.
        */}
       <div className="scroll-fade flex w-full flex-col items-center">
-        <motion.div
-          initial={reduce ? false : { opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ duration: 0.6, ease: EASE }}
-        >
-          <Avatar />
-        </motion.div>
+        {/* L'avatar au cœur d'un polyèdre filaire qui suit le pointeur. */}
+        <div ref={orb.ref} className="relative grid h-[220px] w-[220px] place-items-center sm:h-[260px] sm:w-[260px]">
+          <Scene3D className="absolute inset-0">
+            <HeroOrb animate={orb.visible && !reduce} />
+          </Scene3D>
+          <motion.div
+            className="relative"
+            initial={reduce ? false : { opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ duration: 0.6, ease: EASE }}
+          >
+            <Avatar />
+          </motion.div>
+        </div>
 
         <motion.h1
           id="titre-accueil"
           aria-label={site.name}
-          className="mt-8 max-w-[16ch] text-[2rem] font-bold leading-[1.1] tracking-[-0.03em] sm:text-[2.75rem] lg:text-hero"
+          className="mt-4 max-w-[16ch] text-[2rem] font-bold leading-[1.1] tracking-[-0.03em] sm:text-[2.75rem] lg:text-hero"
           initial={reduce ? false : 'hidden'}
           animate="visible"
           variants={{ visible: { transition: { staggerChildren: 0.04, delayChildren: 0.15 } } }}

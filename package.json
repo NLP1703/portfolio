@@ -11,14 +11,17 @@
     "cv": "esbuild scripts/build-cv.mjs --bundle --platform=node --format=esm --outfile=node_modules/.cache/cv.mjs --log-level=warning && node node_modules/.cache/cv.mjs"
   },
   "dependencies": {
+    "@react-three/fiber": "^8.18.0",
     "framer-motion": "^11.11.17",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
-    "react-icons": "^5.3.0"
+    "react-icons": "^5.3.0",
+    "three": "^0.169.0"
   },
   "devDependencies": {
     "@types/react": "^18.3.12",
     "@types/react-dom": "^18.3.1",
+    "@types/three": "^0.169.0",
     "@vitejs/plugin-react": "^4.3.3",
     "autoprefixer": "^10.4.20",
     "postcss": "^8.4.49",

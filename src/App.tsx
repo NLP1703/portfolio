@@ -1,6 +1,8 @@
-import { useEffect } from 'react'
+import { lazy, useEffect } from 'react'
+import { useReducedMotion } from 'framer-motion'
 import { Footer } from './components/Footer'
 import { Navbar } from './components/Navbar'
+import { Scene3D } from './components/Scene3D'
 import { sectionTitles, type SectionId } from './data/site'
 import { useActiveSection } from './hooks/useActiveSection'
 import { useScrollMotion } from './hooks/useScrollMotion'
@@ -11,6 +13,8 @@ import { Experience } from './sections/Experience'
 import { Hero } from './sections/Hero'
 import { Projects } from './sections/Projects'
 import { Skills } from './sections/Skills'
+
+const StarField = lazy(() => import('./three/StarField'))
 
 const SECTION_IDS: readonly SectionId[] = [
   'accueil',
@@ -25,6 +29,7 @@ export default function App() {
   const { theme, toggle } = useTheme()
   const active = useActiveSection(SECTION_IDS, 'accueil')
   const scrolled = useScrollMotion()
+  const reduce = useReducedMotion()
 
   useEffect(() => {
     document.title = sectionTitles[active]
@@ -38,6 +43,11 @@ export default function App() {
       >
         Aller au contenu
       </a>
+
+      {/* Fond étoilé fixe, derrière tout le contenu. */}
+      <Scene3D className="fixed inset-0 -z-10">
+        <StarField animate={!reduce} />
+      </Scene3D>
 
       <Navbar active={active} theme={theme} onToggleTheme={toggle} scrolled={scrolled} />
 
