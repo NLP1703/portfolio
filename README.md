@@ -38,8 +38,8 @@ src/
   data/                  contenu éditable (site, compétences, projets, expériences)
   sections/              Hero, About, Skills, Projects, Experience, Contact
   three/                 scènes 3D : StarField (fond), HeroOrb (avatar), Globe (contact)
-  components/            Navbar, ThemeToggle, Section, SectionHeading, Stagger, Tilt, Scene3D, Avatar,
-                         ProjectThumb, Footer
+  components/            Navbar, ThemeToggle, Section, SectionHeading, Stagger, Tilt, Magnetic, Scene3D,
+                         Avatar, ProjectThumb, Footer
   hooks/                 useTheme, useActiveSection, useTypewriter, useInView,
                          useScrollMotion, useVisible, useCssVar, useMediaQuery
   styles/index.css       tokens de couleur, classes .btn / .tag / .card, animations
@@ -138,7 +138,27 @@ Le coût reste hors du chemin critique : `Scene3D` ne demande le chunk `three` (
 qu'une fois le navigateur au repos, après le premier affichage. Une scène hors écran cesse de se
 redessiner, `prefers-reduced-motion` fige tout, et sans WebGL les scènes s'effacent sans erreur.
 
-Les cartes Compétences et Projets s'inclinent vers la souris (`Tilt`, Framer Motion).
+## Le mouvement
+
+Une seule courbe, `--ease-cinematic` (`cubic-bezier(0.16, 1, 0.3, 1)`) : l'essentiel de la distance
+est parcouru tôt, la fin est très lente. Chaque section n'a qu'un déclencheur d'entrée (`Section`),
+dont tous ses éléments dérivent leur délai : le titre, puis le contenu, puis les détails.
+
+| Où | Mouvement |
+|---|---|
+| Navbar | Un trait unique glisse d'un lien à l'autre ; un fil d'accent sous la barre suit la progression de lecture. |
+| Hero | Les lettres du nom font le point (flou et remontée) ; au défilement, l'orbe s'avance et monte pendant que le texte recule. Boutons magnétiques. |
+| Titres de section | Chaque mot remonte depuis derrière son propre bord inférieur (`.reveal-mask`). |
+| À propos | Cartes et points distinctifs en cascade ; le point « disponible » pulse. |
+| Compétences | Les puces suivent leur carte, en cascade serrée. Cartes inclinées vers la souris (`Tilt`). |
+| Projets | Le terminal de la vignette imprime ses lignes une à une, puis le curseur clignote trois fois. |
+| Expériences | La timeline se trace au fil du défilement ; chaque jalon s'allume quand le tracé l'atteint. |
+| Contact | Icônes sociales magnétiques (`Magnetic`). |
+
+Le défilement ne provoque aucun rendu React : la parallaxe du hero lit `--scroll-progress`, la barre
+de lecture et la timeline sont des `MotionValue` Framer Motion. Les effets au pointeur (`Tilt`,
+`Magnetic`) ne réagissent qu'à la souris. Sous `prefers-reduced-motion`, tout est affiché d'emblée
+à sa place finale : aucune translation, aucune pulsation, timeline entièrement tracée.
 
 ## Déploiement
 

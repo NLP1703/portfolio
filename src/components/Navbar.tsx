@@ -1,4 +1,5 @@
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useLayoutEffect, useRef, useState } from 'react'
+import { motion, useReducedMotion, useScroll, useSpring } from 'framer-motion'
 import { FiMenu, FiX } from 'react-icons/fi'
 import { navSections, site, type SectionId } from '../data/site'
 import { ThemeToggle } from './ThemeToggle'
@@ -17,11 +18,68 @@ const LINK_STEP = 80
 const LINK_OFFSET = 100
 const CLUSTER_DELAY = 500
 
+/**
+ * Progression de lecture de la page, en fil d'accent sous la barre. Le
+ * ressort absorbe les à-coups de la molette ; sous mouvement réduit la barre
+ * suit le défilement brut.
+ */
+function ReadingProgress() {
+  const reduce = useReducedMotion()
+  const { scrollYProgress } = useScroll()
+  const smooth = useSpring(scrollYProgress, { stiffness: 140, damping: 30, mass: 0.4 })
+
+  return (
+    <motion.span
+      aria-hidden="true"
+      className="absolute inset-x-0 -bottom-px block h-[2px] origin-left bg-accent"
+      style={{ scaleX: reduce ? scrollYProgress : smooth }}
+    />
+  )
+}
+
+type Indicator = { left: number; width: number; visible: boolean }
+
+/**
+ * Position du lien actif dans la liste. Un seul trait glisse d'un lien à
+ * l'autre : le regard suit le déplacement au lieu de voir un trait
+ * s'éteindre ici et un autre s'allumer là.
+ */
+function useActiveIndicator(active: SectionId) {
+  const listRef = useRef<HTMLUListElement>(null)
+  const [indicator, setIndicator] = useState<Indicator>({ left: 0, width: 0, visible: false })
+
+  useLayoutEffect(() => {
+    const list = listRef.current
+    if (!list) return
+
+    const measure = () => {
+      const link = list.querySelector<HTMLElement>('[aria-current="true"]')
+      // Hors navigation (hero) : le trait s'efface sur place, prêt à repartir de là.
+      if (!link) {
+        setIndicator((previous) => ({ ...previous, visible: false }))
+        return
+      }
+      const origin = list.getBoundingClientRect().left
+      const rect = link.getBoundingClientRect()
+      setIndicator({ left: rect.left - origin, width: rect.width, visible: true })
+    }
+
+    measure()
+    // Le chargement des polices et le redimensionnement déplacent les liens.
+    const observer = new ResizeObserver(measure)
+    observer.observe(list)
+    return () => observer.disconnect()
+  }, [active])
+
+  return { listRef, indicator }
+}
+
 export function Navbar({ active, theme, onToggleTheme, scrolled }: Props) {
   const [open, setOpen] = useState(false)
   const [entered, setEntered] = useState(false)
   const toggleRef = useRef<HTMLButtonElement>(null)
   const panelRef = useRef<HTMLDivElement>(null)
+  const { listRef, indicator } = useActiveIndicator(active)
 
   // La barre ne se pose qu'une fois la page installée.
   useEffect(() => {
@@ -80,11 +138,11 @@ export function Navbar({ active, theme, onToggleTheme, scrolled }: Props) {
             {site.monogram}
           </a>
 
-          <ul className="hidden items-center gap-5 sm:flex lg:gap-8">
+          <ul ref={listRef} className="relative hidden items-center gap-5 sm:flex lg:gap-8">
             {navSections.map(({ id, label }, index) => {
               const isActive = active === id
               return (
-                <li key={id} className="relative" style={entrance(index * LINK_STEP + LINK_OFFSET)}>
+                <li key={id} style={entrance(index * LINK_STEP + LINK_OFFSET)}>
                   <a
                     href={`#${id}`}
                     aria-current={isActive ? 'true' : undefined}
@@ -94,17 +152,19 @@ export function Navbar({ active, theme, onToggleTheme, scrolled }: Props) {
                   >
                     {label}
                   </a>
-                  <span
-                    aria-hidden="true"
-                    className="absolute -bottom-0.5 left-0 block h-[2px] bg-accent"
-                    style={{
-                      width: isActive ? '100%' : '0%',
-                      transition: 'width 0.6s var(--ease-cinematic)',
-                    }}
-                  />
                 </li>
               )
             })}
+            {/* Largeur de base 1px, étirée par scaleX : le glissement reste sur le compositeur. */}
+            <span
+              aria-hidden="true"
+              className="absolute -bottom-0.5 left-0 block h-[2px] w-px origin-left bg-accent"
+              style={{
+                opacity: indicator.visible ? 1 : 0,
+                transform: `translateX(${indicator.left}px) scaleX(${indicator.visible ? indicator.width : 0})`,
+                transition: 'transform 0.6s var(--ease-cinematic), opacity 0.3s var(--ease-overlay)',
+              }}
+            />
           </ul>
 
           <div className="flex items-center gap-3" style={entrance(CLUSTER_DELAY)}>
@@ -123,6 +183,8 @@ export function Navbar({ active, theme, onToggleTheme, scrolled }: Props) {
             </button>
           </div>
         </nav>
+
+        <ReadingProgress />
       </header>
 
       {/*

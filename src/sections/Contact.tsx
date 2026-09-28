@@ -2,6 +2,7 @@ import { lazy } from 'react'
 import { useReducedMotion } from 'framer-motion'
 import { FiGithub, FiLinkedin, FiMail, FiMapPin, FiPhone } from 'react-icons/fi'
 import { ContactForm } from '../components/ContactForm'
+import { Magnetic } from '../components/Magnetic'
 import { Scene3D } from '../components/Scene3D'
 import { Section, useSectionMotion } from '../components/Section'
 import { SectionHeading } from '../components/SectionHeading'
@@ -94,18 +95,20 @@ function ContactBody() {
       </Stagger>
 
       <Stagger show={inView} delay={400}>
-        <ul className="mt-8 flex items-center gap-8">
+        <ul className="mt-6 flex items-center gap-4">
           {socials.map(({ label, href, icon: Icon, external }) => (
             <li key={label}>
-              <a
-                href={href}
-                {...(external ? { target: '_blank', rel: 'noreferrer noopener' } : {})}
-                aria-label={external ? `${label}, nouvel onglet` : label}
-                className="block text-ink-secondary transition-[color,transform] duration-300 hover:scale-110 hover:text-accent"
-                style={{ transitionTimingFunction: 'var(--ease-cinematic)' }}
-              >
-                <Icon size={24} aria-hidden="true" />
-              </a>
+              <Magnetic strength={0.4}>
+                <a
+                  href={href}
+                  {...(external ? { target: '_blank', rel: 'noreferrer noopener' } : {})}
+                  aria-label={external ? `${label}, nouvel onglet` : label}
+                  className="block p-2 text-ink-secondary transition-[color,transform] duration-300 hover:scale-110 hover:text-accent"
+                  style={{ transitionTimingFunction: 'var(--ease-cinematic)' }}
+                >
+                  <Icon size={24} aria-hidden="true" />
+                </a>
+              </Magnetic>
             </li>
           ))}
         </ul>

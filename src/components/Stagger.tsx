@@ -6,6 +6,8 @@ type Props = {
   show: boolean
   /** Décalage en millisecondes dans la séquence. */
   delay?: number
+  /** Distance de remontée en pixels : plus courte pour un petit élément. */
+  offset?: number
   className?: string
   as?: 'div' | 'li'
   children: ReactNode
@@ -16,7 +18,7 @@ type Props = {
  * 0.8s sur une courbe très décélérée (0.16, 1, 0.3, 1). Le mouvement se
  * termine long et lent — c'est ce qui donne la sensation cinématique.
  */
-export function Stagger({ show, delay = 0, className, as = 'div', children }: Props) {
+export function Stagger({ show, delay = 0, offset = 24, className, as = 'div', children }: Props) {
   const reduce = useReducedMotion()
   const Tag = as
 
@@ -27,7 +29,7 @@ export function Stagger({ show, delay = 0, className, as = 'div', children }: Pr
       className={className}
       style={{
         opacity: show ? 1 : 0,
-        transform: show ? 'translateY(0)' : 'translateY(24px)',
+        transform: show ? 'translateY(0)' : `translateY(${offset}px)`,
         transition:
           'opacity 0.8s var(--ease-cinematic), transform 0.8s var(--ease-cinematic)',
         transitionDelay: `${delay}ms`,

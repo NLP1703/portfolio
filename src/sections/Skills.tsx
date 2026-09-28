@@ -6,6 +6,9 @@ import { skillGroups } from '../data/skills'
 
 /** Décalage entre deux cartes de la grille. */
 const STEP = 80
+/** Les puces suivent leur carte, en cascade serrée. */
+const TAG_DELAY = 200
+const TAG_STEP = 35
 
 function SkillsGrid() {
   const inView = useSectionMotion()
@@ -18,10 +21,17 @@ function SkillsGrid() {
             <article className="card card-interactive h-full">
               <h3 className="text-cardtitle">{group.title}</h3>
               <ul className="mt-5 flex flex-wrap gap-2">
-                {group.items.map((item) => (
-                  <li key={item} className="tag">
+                {group.items.map((item, itemIndex) => (
+                  <Stagger
+                    key={item}
+                    as="li"
+                    show={inView}
+                    delay={index * STEP + TAG_DELAY + itemIndex * TAG_STEP}
+                    offset={8}
+                    className="tag"
+                  >
                     {item}
-                  </li>
+                  </Stagger>
                 ))}
               </ul>
             </article>

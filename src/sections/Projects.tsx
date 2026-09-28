@@ -21,7 +21,14 @@ function StatusTag({ project }: { project: Project }) {
   return null
 }
 
-function ProjectCard({ project, reversed }: { project: Project; reversed: boolean }) {
+type CardProps = {
+  project: Project
+  reversed: boolean
+  /** Délai de la carte dans la séquence, transmis à la vignette. */
+  delay: number
+}
+
+function ProjectCard({ project, reversed, delay }: CardProps) {
   const [open, setOpen] = useState(false)
   const reduce = useReducedMotion()
   const detailsId = `details-${project.id}`
@@ -33,7 +40,7 @@ function ProjectCard({ project, reversed }: { project: Project; reversed: boolea
           className={`overflow-hidden rounded-card ${reversed ? 'lg:order-2' : ''}`}
         >
           <div className="h-full transition-transform duration-300 ease-out group-hover:scale-[1.03]">
-            <ProjectThumb project={project} />
+            <ProjectThumb project={project} delay={delay} />
           </div>
         </div>
 
@@ -120,7 +127,7 @@ function ProjectList() {
       {projects.map((project, index) => (
         <Stagger key={project.id} show={inView} delay={index * STEP}>
           <Tilt max={3}>
-            <ProjectCard project={project} reversed={index % 2 === 1} />
+            <ProjectCard project={project} reversed={index % 2 === 1} delay={index * STEP} />
           </Tilt>
         </Stagger>
       ))}
